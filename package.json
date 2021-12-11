@@ -31,7 +31,7 @@
     "singleQuote": true,
     "trailingComma": "es5"
   },
-  "name": "state-bus",
+  "name": "@xdoer/state-bus",
   "author": "xdoer",
   "description": "A simple state share tool for React App",
   "module": "dist/state-bus.esm.js",

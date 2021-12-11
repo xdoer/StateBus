@@ -5,13 +5,13 @@ A simple state share tool for React App.
 ## Install
 
 ```bash
-$ npm install state-bus
+$ npm install @xdoer/state-bus --save
 ```
 
 ## Example
 
 ```tsx
-import StateBus from 'state-bus';
+import StateBus from '@xdoer/state-bus';
 
 const store = new StateBus(0);
 
