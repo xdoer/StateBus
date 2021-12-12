@@ -44,7 +44,10 @@ export class StateBus<T = any> {
       return () => {
         this.unsubscribe(setData)
 
-        if (!this.listeners.length) this.stateStack = []
+        if (!this.listeners.length) {
+          this.stateStack = []
+          this.state = null
+        }
       }
     }, [])
 
