@@ -28,7 +28,7 @@ export class StateBus<T = any> {
     return this.state as T
   }
 
-  setState(data: T | ((prevState?: T) => T)) {
+  setState(data: T | ((prevState: T) => T)) {
     this.listeners.forEach(listener => listener(data))
 
     this.stateStack.push(data)

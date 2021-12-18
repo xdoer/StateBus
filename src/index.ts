@@ -18,6 +18,6 @@ export const getStore = <T>(key: string) => {
   return sbm.init<T>(key).getState()
 }
 
-export const setStore = <T>(key: string, data: T) => {
+export const setStore = <T>(key: string, data: T | ((prev: T) => T)) => {
   return sbm.init<T>(key).setState(data)
 }

@@ -7,11 +7,11 @@ export class StateBusManager {
     return this.stateBuses[key]
   }
 
-  set<T>(key: string, initData: T) {
+  set<T>(key: string, initData: T | ((prev?: T) => T)) {
     this.stateBuses[key] = new StateBus<T>(initData)
   }
 
-  init<T>(key: string, initData?: T) {
+  init<T>(key: string, initData?: T | (() => T)) {
     return this.get<T>(key) || this.set(key, initData) || this.get<T>(key)
   }
 }
