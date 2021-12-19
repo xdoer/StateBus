@@ -3,11 +3,8 @@ import React, { useState, useEffect } from 'react'
 type Dispatch<T> = React.Dispatch<React.SetStateAction<T>>
 
 export class StateBus<T = any> {
-  private stateStack = []
 
-  constructor(private state: T | (() => T)) {
-    this.stateStack.push(state)
-  }
+  constructor(private state: T | (() => T)) { }
 
   private listeners: Dispatch<T>[] = []
 
@@ -21,18 +18,17 @@ export class StateBus<T = any> {
   }
 
   getState(): T {
-    if (typeof this.state !== 'function') return this.state
-
-    this.state = this.stateStack.reduce((result, current) => typeof current === 'function' ? current(result) : current, undefined)
+    if (typeof this.state === 'function') return (this.state as any)()
 
     return this.state as T
   }
 
   setState(data: T | ((prevState: T) => T)) {
-    this.listeners.forEach(listener => listener(data))
-
-    this.stateStack.push(data)
-    if (typeof data !== 'function') this.state = data
+    if (typeof data === 'function') {
+      this.listeners.forEach(listener => listener((prev: T) => this.state = (data as any)(prev)))
+    } else {
+      this.listeners.forEach(listener => listener(data))
+    }
   }
 
   useState() {
@@ -45,7 +41,6 @@ export class StateBus<T = any> {
         this.unsubscribe(setData)
 
         if (!this.listeners.length) {
-          this.stateStack = []
           this.state = null
         }
       }

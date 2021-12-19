@@ -6,11 +6,11 @@ export default StateBus
 
 const sbm = new StateBusManager()
 
-export const initStore = <T>(key: string, init?: T) => {
+export const initStore = <T>(key: string, init?: T | (() => T)) => {
   sbm.init(key, init)
 }
 
-export const useStore = <T>(key: string, init?: T) => {
+export const useStore = <T>(key: string, init?: T | (() => T)) => {
   return sbm.init<T>(key, init).useState()
 }
 
