@@ -4,7 +4,7 @@ type Dispatch<T> = React.Dispatch<React.SetStateAction<T>>
 
 export class StateBus<T = any> {
 
-  constructor(private state: T | (() => T)) { }
+  constructor(private state?: T | (() => T)) { }
 
   private listeners: Dispatch<T>[] = []
 
