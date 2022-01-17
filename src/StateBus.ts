@@ -27,6 +27,7 @@ export class StateBus<T = any> {
       this.listeners.forEach(listener => listener((prev: T) => this.state = (data as any)(prev)))
     } else {
       this.listeners.forEach(listener => listener(data))
+      this.state = data
     }
   }
 
