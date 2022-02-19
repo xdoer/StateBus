@@ -48,4 +48,8 @@ export class StateBus<T = any> {
 
     return [data, this.setState.bind(this)] as [T, RDispatch<T>]
   }
+
+  static create<T>(state?: T | (() => T)) {
+    return new StateBus<T>(state)
+  }
 }

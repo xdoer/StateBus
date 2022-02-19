@@ -1,30 +1,22 @@
 # StateBus
 
-A simple state share tool for React App.
+React 下一个简单的状态共享工具
 
-## Install
+## 安装
 
 ```bash
-$ npm install @xdoer/state-bus --save
+npm install @xdoer/state-bus --save
 ```
 
-## Example
+## 使用
 
-### Base Usage
+1. 组件外部初始化一个 `StatusBus` 对象。
+2. 组件内部使用 `StatusBus` 对象上的 `useState` 方法。
 
 ```tsx
 import StateBus from '@xdoer/state-bus';
 
-const store = new StateBus(0);
-
-const Home = () => {
-  return (
-    <div>
-      <Profile1 />
-      <Profile2 />
-    </div>
-  );
-};
+const store = new StateBus<number>(0);
 
 const Profile1 = () => {
   const [count, setCount] = store.useState();
@@ -49,32 +41,45 @@ const Profile2 = () => {
 };
 ```
 
-### createShareHook
+## createShareHook
+
+`createShareHook` 是一件简单的闭包函数，允许你创建高阶 Hook。
 
 ```tsx
 import { createShareHook } from '@xdoer/state-bus';
 
-const useCount = createShareHook((state, ...rest: number[]) => {
-  const [count, setCount] = state.useState();
+const useCount = createShareHook(
+  store => {
+    const [count, setCount] = store.useState();
 
-  useEffect(() => {
-    setCunt(count => rest.reduce((t, c) => t + c, count));
-  }, []);
+    useEffect(() => {
+      // 多次调用 useCount, 如果只需要初始化一次数据, 可以向 store 对象上挂载数据，实现锁效果
+      if (store.init) return;
+      store.init = true;
 
-  return { count, setCount };
-}, 0);
+      request('/count').then(res => setCount(res));
+    }, [store.init]);
 
-const Home = () => {
-  return (
-    <div>
-      <Profile1 />
-      <Profile2 />
-    </div>
-  );
-};
+    return { count, setCount };
+  },
+  0
+);
+```
 
-const Profile1 = () => {
-  const { count, setCount } = useCount(1, 2, 3);
+## useStore
+
+`useStore` 不再需要在组件外部初始化 `StateBus`。与 `useState` 不同的是，需要你指定一个 `key`
+
+```tsx
+import { useStore } from '@xdoer/state-bus';
+
+function useCount() {
+  const [count, setCount] = useStore('count', '1')
+  return { count, setCount }
+}
+
+const Profile1 = ({ id }) => {
+  const { count, setCount } = useCount()
 
   return (
     <div>
@@ -85,7 +90,7 @@ const Profile1 = () => {
 };
 
 const Profile2 = () => {
-  const { count, setCount } = useCount(2, 3, 4);
+  const { count, setCount } = useCount()
 
   return (
     <div>
@@ -96,39 +101,81 @@ const Profile2 = () => {
 };
 ```
 
-### useStore
+## getStore
+
+`getStore` 允许你在任意地方，获得 `useStore` 状态数据
 
 ```tsx
-import { useStore } from '@xdoer/state-bus';
+const Button = () => {
+  const [count, setCount] = useState()
 
-const Home = () => {
+  function onClick() {
+    // 根据 key 得到状态
+    const storeCount = getStore('count')
+
+    setCount(storeCount)
+  }
+
   return (
-    <div>
-      <Profile1 />
-      <Profile2 />
+    <div onClick={onClick}>
+      storeCount: {count}
     </div>
   );
 };
+```
 
-const Profile1 = () => {
-  const { count, setCount } = useStore('count', 1);
+## setCount
+
+`setStore` 允许你在任意地方，更新 `useStore` 状态数据
+
+```tsx
+const Button = () => {
+
+  function onClick() {
+    setStore('count', 1)
+
+    setStore('count', prev => prev + 1)
+  }
 
   return (
-    <div>
-      <div>count: {count}</div>
-      <div onClick={() => setCount(i => i + 1)}>setCount</div>
+    <div onClick={onClick}>
+      click
     </div>
   );
 };
+```
 
-const Profile2 = () => {
-  const { count, setCount } = useStore('count');
+## 扩展
 
-  return (
-    <div>
-      <div>count: {count}</div>
-      <div onClick={() => setCount(i => i + 1)}>setCount</div>
-    </div>
-  );
-};
+如何持久化状态到异步 storage ?
+
+```ts
+class StorageState<T = any> extends StateBus<T> {
+  constructor(private key: string, init?: T | (() => T)) {
+    super(init);
+  }
+
+  async getState(): Promise<T> {
+    const state = super.getState();
+    const storage: any = await getStorage(this.key);
+
+    if (!isUndefined(storage)) {
+      if (state !== storage) {
+        super.setState(storage as any);
+      }
+      return storage;
+    }
+
+    if (!isUndefined(state)) {
+      await setStorage({ key: this.key, data: state });
+    }
+
+    return state;
+  }
+
+  async setState(state: any) {
+    super.setState(state);
+    await setStorage({ key: this.key, data: state });
+  }
+}
 ```
