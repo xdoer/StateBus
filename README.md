@@ -43,7 +43,7 @@ const Profile2 = () => {
 
 ## 装载与卸载
 
-`StateBus` 对象暴露了一个 `hooks` 对象，对象上有 `onMount` 和 `onUnMount` 事件。
+`StateBus` 暴露了一个 `hooks` 对象，对象上有 `onMount` 和 `onUnMount` 事件。
 
 ```tsx
 const store = StateBus.create<number>(0);
@@ -56,20 +56,25 @@ store.hooks.onUnMount = () => {
   // 最后一个组件卸载时执行
 }
 
-const Profile1 = () => {
+const Profile = () => {
   const [count, setCount] = store.useState();
   return <div>{count}</div>;
 };
 
-const Profile2 = () => {
-  const [count, setCount] = store.useState();
-  return <div>{count}</div>
-};
+export default function App() {
+  return (
+    <>
+      <Profile /> // 组件 mount 时，执行 store.hooks.onMount
+      <Profile />
+      <Profile /> // 组件 onMount 时，执行 store.hooks.onUnMount
+    </>
+  )
+}
 ```
 
 ## createShareHook
 
-`createShareHook` 是一件简单的闭包函数，允许你创建高阶 Hook。
+`createShareHook` 是一件简单的闭包函数，允许你创建高阶 Hook，产生的状态在所有组件中共享。
 
 ```tsx
 import { createShareHook } from '@xdoer/state-bus';
@@ -78,15 +83,18 @@ const useCount = createShareHook(
   store => {
     const [count, setCount] = store.useState();
 
+    // 多次调用 useCount, 这里只执行一次
     store.hooks.onMount = () => {
       request('/count').then(res => setCount(res));
     }
 
     return { count, setCount };
   },
-  0
+  0 // 初始化数据
 );
 ```
+
+基于 StateBus 实现的多组件共享状态的请求库: [useRequest](https://pre-quest.vercel.app/#/use-request)
 
 ## useStore
 
