@@ -49,18 +49,18 @@ export class StateBus<T = any> {
 
   private onMount() {
     if (!this.listeners.length) {
-      this.hooks?.onMount()
+      this.hooks.onMount?.()
     }
   }
 
   private onUnMount() {
     if (!this.listeners.length) {
-      this.hooks?.onUnMount()
+      this.hooks.onUnMount?.()
       this.state = null
     }
   }
 
-  hooks: Hooks
+  hooks: Hooks = {}
 
   static create<T>(state?: T | (() => T)) {
     return new StateBus<T>(state)
