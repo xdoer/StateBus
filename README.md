@@ -41,6 +41,29 @@ const Profile2 = () => {
 };
 ```
 
+## Set/Get
+
+通过 `StateBus` 对象上的 `getState` 和 `setState`，可以实现在任意地方获取和变更状态
+
+```tsx
+const store = StateBus.create<number>(0);
+
+const Button = () => {
+
+  function onClick() {
+    const count = store.getState()
+
+    store.setState(count + 1)
+  }
+
+  return (
+    <div onClick={onClick}>
+      点击
+    </div>
+  );
+};
+```
+
 ## 装载与卸载
 
 `StateBus` 暴露了一个 `hooks` 对象，对象上有 `onMount` 和 `onUnMount` 事件。
@@ -108,14 +131,11 @@ function useCount() {
   return { count, setCount }
 }
 
-const Profile1 = ({ id }) => {
+const Profile1 = () => {
   const { count, setCount } = useCount()
 
   return (
-    <div>
-      <div>count: {count}</div>
-      <div onClick={() => setCount(i => i + 1)}>setCount</div>
-    </div>
+    <div>count: {count}</div>
   );
 };
 
@@ -123,15 +143,12 @@ const Profile2 = () => {
   const { count, setCount } = useCount()
 
   return (
-    <div>
-      <div>count: {count}</div>
-      <div onClick={() => setCount(i => i + 1)}>setCount</div>
-    </div>
+    <div>count: {count}</div>
   );
 };
 ```
 
-## getStore
+## getStore/setStore
 
 `getStore` 允许你在任意地方，获得 `useStore` 状态数据
 
@@ -154,9 +171,7 @@ const Button = () => {
 };
 ```
 
-## setCount
-
-`setStore` 允许你在任意地方，更新 `useStore` 状态数据
+而 `setStore` 允许你在任意地方，更新 `useStore` 状态数据
 
 ```tsx
 const Button = () => {
