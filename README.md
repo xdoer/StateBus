@@ -16,7 +16,7 @@ npm install @xdoer/state-bus --save
 ```tsx
 import StateBus from '@xdoer/state-bus';
 
-const store = new StateBus<number>(0);
+const store = StateBus.create<number>(0);
 
 const Profile1 = () => {
   const [count, setCount] = store.useState();
@@ -41,6 +41,32 @@ const Profile2 = () => {
 };
 ```
 
+## 装载与卸载
+
+`StateBus` 对象暴露了一个 `hooks` 对象，对象上有 `onMount` 和 `onUnMount` 事件。
+
+```tsx
+const store = StateBus.create<number>(0);
+
+store.hooks.onMount = () => {
+  // 第一个组件加载时执行
+}
+
+store.hooks.onUnMount = () => {
+  // 最后一个组件卸载时执行
+}
+
+const Profile1 = () => {
+  const [count, setCount] = store.useState();
+  return <div>{count}</div>;
+};
+
+const Profile2 = () => {
+  const [count, setCount] = store.useState();
+  return <div>{count}</div>
+};
+```
+
 ## createShareHook
 
 `createShareHook` 是一件简单的闭包函数，允许你创建高阶 Hook。
@@ -52,13 +78,9 @@ const useCount = createShareHook(
   store => {
     const [count, setCount] = store.useState();
 
-    useEffect(() => {
-      // 多次调用 useCount, 如果只需要初始化一次数据, 可以向 store 对象上挂载数据，实现锁效果
-      if (store.init) return;
-      store.init = true;
-
+    store.hooks.onMount = () => {
       request('/count').then(res => setCount(res));
-    }, [store.init]);
+    }
 
     return { count, setCount };
   },
@@ -147,7 +169,7 @@ const Button = () => {
 
 ## 扩展
 
-如何持久化状态到异步 storage ?
+持久化状态到异步 storage
 
 ```ts
 class StorageState<T = any> extends StateBus<T> {

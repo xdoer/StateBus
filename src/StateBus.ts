@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { RDispatch, SetStateAction } from './types'
+import { Hooks, RDispatch, SetStateAction } from './types'
 
 export class StateBus<T = any> {
 
@@ -35,19 +35,32 @@ export class StateBus<T = any> {
     const [data, setData] = useState<T>(this.state)
 
     useEffect(() => {
+      this.onMount()
       this.subscribe(setData)
 
       return () => {
         this.unsubscribe(setData)
-
-        if (!this.listeners.length) {
-          this.state = null
-        }
+        this.onUnMount()
       }
     }, [])
 
     return [data, this.setState.bind(this)] as [T, RDispatch<T>]
   }
+
+  private onMount() {
+    if (!this.listeners.length) {
+      this.hooks?.onMount()
+    }
+  }
+
+  private onUnMount() {
+    if (!this.listeners.length) {
+      this.hooks?.onUnMount()
+      this.state = null
+    }
+  }
+
+  hooks: Hooks
 
   static create<T>(state?: T | (() => T)) {
     return new StateBus<T>(state)
