@@ -117,11 +117,11 @@ const useCount = createShareHook(
 );
 ```
 
-基于 StateBus 实现的多组件共享状态的请求库: [useRequest](https://pre-quest.vercel.app/#/use-request)
+基于 StateBus 实现的共享状态的请求库: [useRequest](https://pre-quest.vercel.app/#/use-request)
 
 ## useStore
 
-`useStore` 不再需要在组件外部初始化 `StateBus`。与 `useState` 不同的是，需要你指定一个 `key`
+`useStore` 不再需要在组件外部初始化 `StateBus`。使用与 `useState` 类似，但是不同的是，需要你指定一个 `key`
 
 ```tsx
 import { useStore } from '@xdoer/state-bus';
