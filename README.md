@@ -89,7 +89,7 @@ export default function App() {
     <>
       <Profile /> // 组件 mount 时，执行 store.hooks.onMount
       <Profile />
-      <Profile /> // 组件 onMount 时，执行 store.hooks.onUnMount
+      <Profile /> // 组件 unMount 时，执行 store.hooks.onUnMount
     </>
   )
 }

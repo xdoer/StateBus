@@ -18,7 +18,6 @@ export class StateBus<T = any> {
 
   getState(): T {
     if (typeof this.state === 'function') return (this.state as any)()
-
     return this.state as T
   }
 
