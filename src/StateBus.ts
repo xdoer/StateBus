@@ -18,7 +18,7 @@ export class StateBus<T = any> {
 
   getState(): T {
     if (typeof this.state === 'function') return (this.state as any)()
-    return this.state as T
+    return this.state
   }
 
   setState(data: SetStateAction<T>) {
@@ -59,7 +59,7 @@ export class StateBus<T = any> {
     }
   }
 
-  hooks: Hooks = {}
+  readonly hooks: Hooks = {}
 
   static create<T>(state?: T | (() => T)) {
     return new StateBus<T>(state)
