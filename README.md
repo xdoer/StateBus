@@ -95,6 +95,8 @@ export default function App() {
 }
 ```
 
+`onMount` 在使用时需要注意: 如果函数体内是同步代码，且进行了 `store.setState` 的操作，由于此时其他组件还没有 mount, 所以 `store.setState` 操作并不会成功，可以在 `nextTick` 或者 `setTimeout` 中进行状态赋值。
+
 ## createShareHook
 
 `createShareHook` 是一件简单的闭包函数，允许你创建高阶 Hook，产生的状态在所有组件中共享。
