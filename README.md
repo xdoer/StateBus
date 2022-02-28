@@ -17,6 +17,8 @@ npm install @xdoer/state-bus --save
 import StateBus from '@xdoer/state-bus';
 
 const store = StateBus.create<number>(0);
+// 或者
+const store = StateBus.create<number>(() => 0);
 
 const Profile1 = () => {
   const [count, setCount] = store.useState();
@@ -64,6 +66,34 @@ const Button = () => {
 };
 ```
 
+## createShareHook
+
+`createShareHook` 是一件简单的闭包函数，允许你创建高阶 Hook，产生的状态在所有组件中共享。
+
+```tsx
+import { createShareHook } from '@xdoer/state-bus';
+
+const useCount = createShareHook(
+  // 函数参数是一个 StateBus 对象
+  store => {
+    const [count, setCount] = store.useState();
+    return { count, setCount };
+  },
+  // 初始化数据
+  0
+);
+
+const useCount = createShareHook(
+  // 函数参数是一个 StateBus 对象
+  (store) => {
+    const [count, setCount] = store.useState();
+    return { count, setCount };
+  },
+  // 初始化数据
+  () => 0
+);
+```
+
 ## 装载与卸载
 
 `StateBus` 暴露了一个 `hooks` 对象，对象上有 `onMount` 和 `onUnMount` 事件。
@@ -71,13 +101,11 @@ const Button = () => {
 ```tsx
 const store = StateBus.create<number>(0);
 
-store.hooks.onMount = () => {
-  // 第一个组件加载时执行
-}
+// 第一个组件加载时执行
+store.hooks.onMount = () => {}
 
-store.hooks.onUnMount = () => {
-  // 最后一个组件卸载时执行
-}
+// 最后一个组件卸载时执行
+store.hooks.onUnMount = () => {}
 
 const Profile = () => {
   const [count, setCount] = store.useState();
@@ -95,35 +123,87 @@ export default function App() {
 }
 ```
 
-`onMount` 在使用时需要注意: 如果函数体内是同步代码，且进行了 `store.setState` 的操作，由于此时其他组件还没有 mount, 所以 `store.setState` 操作并不会成功，可以在 `nextTick` 或者 `setTimeout` 中进行状态赋值。
+### onMount
 
-## createShareHook
+`onMount` 一般用来初始化只需要执行一次的异步代码，比如发起 HTTP 请求后，更新所有相关组件状态。
 
-`createShareHook` 是一件简单的闭包函数，允许你创建高阶 Hook，产生的状态在所有组件中共享。
+```ts
+const useUser = createShareHook((store) => {
+  const [user, setUser] = store.useState()
 
-```tsx
-import { createShareHook } from '@xdoer/state-bus';
+  store.hooks.onMount = async () => {
+    const res = await fetch('/user')
+    const user = await res.json()
+    setUser(user)
+  }
 
-const useCount = createShareHook(
-  store => {
-    const [count, setCount] = store.useState();
-
-    // 多次调用 useCount, 这里只执行一次
-    store.hooks.onMount = () => {
-      request('/count').then(res => setCount(res));
-    }
-
-    return { count, setCount };
-  },
-  0 // 初始化数据
-);
+  return { user }
+})
 ```
 
-基于 StateBus 实现的共享状态的请求库: [useRequest](https://pre-quest.vercel.app/#/use-request)
+而若要初始化同步代码，由于其他组件还没有 mount, 所以在 `onMount` 中更新状态无效。
+
+```ts
+const useUser = createShareHook((store) => {
+  const [user, setUser] = store.useState()
+
+  store.hooks.onMount = async () => {
+    const user = getUserInfoSync()
+    // 操作无效
+    setUser(user)
+  }
+
+  return { user }
+})
+```
+
+初始化同步代码需要在创建 `StateBus` 对象时，传进去就可以。
+
+```ts
+const useUser = createShareHook(
+  (store) => {
+    const [user, setUser] = store.useState()
+    return { user }
+  },
+  () => getUserInfoSync()
+)
+
+// 或者
+const userStore = StateBus.create(getUserInfoSync())
+
+// 或者
+const userStore = StateBus.create(() => getUserInfoSync())
+```
+
+### onUnMount
+
+`onUnMount` 一般用于清除缓存数据的一些操作
+
+```ts
+const globalCache = {}
+
+const useUser = createShareHook((store) => {
+  const [user, setUser] = store.useState()
+
+  store.hooks.onMount = async () => {
+    const res = await fetch('/user')
+    const user = await res.json()
+    globalCache['user'] = user
+  }
+
+  store.hooks.onUnMount = async () => {
+    delete globalCache['user']
+  }
+
+  return { user }
+})
+```
+
+基于 StateBus 实现的共享状态的请求库: [useRequest](https://github.com/xdoer/PreQuest/tree/main/packages/use-request)
 
 ## useStore
 
-`useStore` 不再需要在组件外部初始化 `StateBus`。使用与 `useState` 类似，但是不同的是，需要你指定一个 `key`
+`useStore` 不再需要在组件外部初始化 `StateBus`。使用与 `useState` 类似，但是不同的是，需要你指定一个 `key`.
 
 ```tsx
 import { useStore } from '@xdoer/state-bus';
