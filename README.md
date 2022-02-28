@@ -94,6 +94,16 @@ const useCount = createShareHook(
 );
 ```
 
+可以根据 `useCount.store` 对状态进行 `get/set` 操作
+
+```ts
+// 获取状态
+useCount.store.getState()
+
+// 设置状态
+useCount.store.setState(1)
+```
+
 ## 装载与卸载
 
 `StateBus` 暴露了一个 `hooks` 对象，对象上有 `onMount` 和 `onUnMount` 事件。
