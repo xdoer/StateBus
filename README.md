@@ -94,7 +94,12 @@ const useCount = createShareHook(
 );
 ```
 
-可以根据 `useCount.store` 对状态进行 `get/set` 操作
+使用
+```ts
+const { user, setUser } = useUser()
+```
+
+同时 useUser 上装载了内部的 StateBus 对象，你可以根据 `useCount.store` 在任意地方进行 `get/set` 操作
 
 ```ts
 // 获取状态
