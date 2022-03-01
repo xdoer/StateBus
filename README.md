@@ -68,7 +68,7 @@ const Button = () => {
 
 ## createShareHook
 
-`createShareHook` 是一件简单的闭包函数，允许你创建高阶 Hook，产生的状态在所有组件中共享。
+`createShareHook` 是一个简单的闭包函数，允许你创建高阶 Hook，产生的状态在所有组件中共享。
 
 ```tsx
 import { createShareHook } from '@xdoer/state-bus';
